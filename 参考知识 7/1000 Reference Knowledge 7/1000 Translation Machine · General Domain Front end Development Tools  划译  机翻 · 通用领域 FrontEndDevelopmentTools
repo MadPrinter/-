@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端代码生成工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .tool-container {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .tool-header {
+            background: #4a5568;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.4rem;
+        }
+        
+        .tool-body {
+            padding: 25px;
+        }
+        
+        .options-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .option-group label {
+            font-weight: 600;
+            color: #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .option-group label span {
+            font-weight: normal;
+            color: #667eea;
+        }
+        
+        .option-group input, .option-group select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .option-group .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .option-group .color-picker input {
+            flex: 1;
+            padding: 5px;
+            height: 40px;
+        }
+        
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .preview-display {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+        
+        .code-container {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-container pre {
+            white-space: pre-wrap;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #667eea;
+        }
+        
+        .tutorial-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .tutorial-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 250px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .step h3 {
+            margin-bottom: 12px;
+            color: #4a5568;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        /* 示例组件样式 */
+        .example-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .example-card {
+            width: 100%;
+            max-width: 300px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .example-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .example-card-content {
+            padding: 20px;
+        }
+        
+        .example-card h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .example-card p {
+            color: #718096;
+            margin-bottom: 15px;
+        }
+        
+        .example-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 8px;
+            width: 100%;
+        }
+        
+        .example-navbar .logo {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #667eea;
+        }
+        
+        .example-navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .example-navbar .nav-links a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        /* 滑动条样式 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .fix-highlight {
+            background: #ffeaa7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>前端代码生成工具</h1>
+        </header>
+        
+        <div class="main-content">
+            <div class="tool-container">
+                <div class="tool-header">
+                    <h2>组件配置</h2>
+                </div>
+                <div class="tool-body">
+                    <div class="options-panel">
+                        <div class="option-group">
+                            <label for="component-type">选择组件类型</label>
+                            <select id="component-type">
+                                <option value="button">按钮</option>
+                                <option value="card">卡片</option>
+                                <option value="navbar">导航栏</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="bg-color">背景颜色 <span id="bg-color-value">#667eea</span></label>
+                            <div class="color-picker">
+                                <input type="color" id="bg-color" value="#667eea">
+                                <input type="text" id="bg-color-text" value="#667eea">
+                            </div>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="text-color">文字颜色 <span id="text-color-value">#000000</span></label>
+                            <div class="color-picker">
+                                <input type="color" id="text-color" value="#000000">
+                                <input type="text" id="text-color-text" value="#000000">
+                            </div>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="padding">内边距 <span id="padding-value" class="slider-value">12px</span></label>
+                            <input type="range" id="padding" min="5" max="30" value="12">
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="rounded">圆角大小 <span id="rounded-value" class="slider-value">6px</span></label>
+                            <input type="range" id="rounded" min="0" max="20" value="6">
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="shadow">阴影大小 <span id="shadow-value" class="slider-value">2</span></label>
+                            <input type="range" id="shadow" min="0" max="10" value="2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tool-container">
+                <div class="tool-header">
+                    <h2>实时预览 & 代码</h2>
+                </div>
+                <div class="tool-body">
+                    <div class="preview-container">
+                        <div class="preview-display">
+                            <!-- 预览内容将在这里动态生成 -->
+                            <button class="example-btn" id="preview-element">示例按钮</button>
+                        </div>
+                        
+                        <div class="code-container">
+                            <button class="copy-btn" id="copy-code">
+                                <i class="fas fa-copy"></i> 复制代码
+                            </button>
+                            <pre id="generated-code"><code>// 生成的代码将显示在这里</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+       
+    
+    <footer>
+        <p>© 2025 前端代码生成工具v1.0 @MadPrinter</p>
+    </footer>
+
+    <script>
+        // 获取DOM元素
+        const componentType = document.getElementById('component-type');
+        const bgColor = document.getElementById('bg-color');
+        const bgColorText = document.getElementById('bg-color-text');
+        const bgColorValue = document.getElementById('bg-color-value');
+        const textColor = document.getElementById('text-color');
+        const textColorText = document.getElementById('text-color-text');
+        const textColorValue = document.getElementById('text-color-value');
+        const padding = document.getElementById('padding');
+        const paddingValue = document.getElementById('padding-value');
+        const rounded = document.getElementById('rounded');
+        const roundedValue = document.getElementById('rounded-value');
+        const shadow = document.getElementById('shadow');
+        const shadowValue = document.getElementById('shadow-value');
+        const previewElement = document.getElementById('preview-element');
+        const generatedCode = document.getElementById('generated-code');
+        const copyButton = document.getElementById('copy-code');
+        
+        // 初始化值显示
+        paddingValue.textContent = `${padding.value}px`;
+        roundedValue.textContent = `${rounded.value}px`;
+        shadowValue.textContent = `${shadow.value}`;
+        
+        // 同步颜色选择器和文本输入框
+        bgColor.addEventListener('input', () => {
+            bgColorText.value = bgColor.value;
+            bgColorValue.textContent = bgColor.value;
+            updatePreview();
+        });
+        
+        bgColorText.addEventListener('input', () => {
+            bgColor.value = bgColorText.value;
+            bgColorValue.textContent = bgColorText.value;
+            updatePreview();
+        });
+        
+        textColor.addEventListener('input', () => {
+            textColorText.value = textColor.value;
+            textColorValue.textContent = textColor.value;
+            updatePreview();
+        });
+        
+        textColorText.addEventListener('input', () => {
+            textColor.value = textColorText.value;
+            textColorValue.textContent = textColorText.value;
+            updatePreview();
+        });
+        
+        // 更新滑动条值显示
+        padding.addEventListener('input', () => {
+            paddingValue.textContent = `${padding.value}px`;
+            updatePreview();
+        });
+        
+        rounded.addEventListener('input', () => {
+            roundedValue.textContent = `${rounded.value}px`;
+            updatePreview();
+        });
+        
+        shadow.addEventListener('input', () => {
+            shadowValue.textContent = `${shadow.value}`;
+            updatePreview();
+        });
+        
+        // 监听组件类型变化
+        componentType.addEventListener('change', updatePreview);
+        
+        // 更新预览
+        function updatePreview() {
+            const paddingVal = padding.value + 'px';
+            const roundedVal = rounded.value + 'px';
+            
+            // 改进的阴影计算 - 避免突然消失的问题
+            const shadowIntensity = shadow.value;
+            let shadowVal;
+            
+            if (shadowIntensity == 0) {
+                shadowVal = 'none';
+            } else {
+                // 更平滑的阴影计算公式
+                const blur = shadowIntensity * 3;
+                const spread = shadowIntensity / 2;
+                const opacity = 0.1 + (shadowIntensity * 0.05);
+                shadowVal = `0 ${shadowIntensity}px ${blur}px ${spread}px rgba(0, 0, 0, ${opacity})`;
+            }
+            
+            // 根据选择的组件类型更新预览
+            if (componentType.value === 'button') {
+                previewElement.innerHTML = '示例按钮';
+                previewElement.className = 'example-btn';
+                previewElement.style.display = 'block';
+                
+                previewElement.style.backgroundColor = bgColor.value;
+                previewElement.style.color = textColor.value;
+                previewElement.style.padding = `12px ${paddingVal}`;
+                previewElement.style.borderRadius = roundedVal;
+                previewElement.style.boxShadow = shadowVal;
+                
+                generateButtonCode();
+            } 
+            else if (componentType.value === 'card') {
+                previewElement.innerHTML = `
+                    <div class="example-card">
+                        <img src="https://via.placeholder.com/300x180/667eea/ffffff?text=示例图片" alt="示例">
+                        <div class="example-card-content">
+                            <h3>示例卡片</h3>
+                            <p>这是一个通过工具生成的卡片组件示例。</p>
+                            <button style="background: ${bgColor.value}; color: ${textColor.value}; padding: 8px ${paddingVal}; border-radius: ${roundedVal}; box-shadow: ${shadowVal};">行动按钮</button>
+                        </div>
+                    </div>
+                `;
+                generateCardCode();
+            }
+            else if (componentType.value === 'navbar') {
+                previewElement.innerHTML = `
+                    <div class="example-navbar">
+                        <div class="logo" style="color: ${bgColor.value};">Logo</div>
+                        <div class="nav-links">
+                            <a href="#" style="color: ${textColor.value};">首页</a>
+                            <a href="#" style="color: ${textColor.value};">服务</a>
+                            <a href="#" style="color: ${textColor.value};">关于</a>
+                            <a href="#" style="color: ${textColor.value};">联系</a>
+                        </div>
+                    </div>
+                `;
+                generateNavbarCode();
+            }
+        }
+        
+        // 生成按钮代码
+        function generateButtonCode() {
+            const shadowIntensity = shadow.value;
+            let shadowCss;
+            
+            if (shadowIntensity == 0) {
+                shadowCss = 'none';
+            } else {
+                const blur = shadowIntensity * 3;
+                const spread = shadowIntensity / 2;
+                const opacity = 0.1 + (shadowIntensity * 0.05);
+                shadowCss = `0 ${shadowIntensity}px ${blur}px ${spread}px rgba(0, 0, 0, ${opacity})`;
+            }
+            
+            const code = `<!-- HTML -->
+<button class="custom-btn">示例按钮</button>
+
+<!-- CSS -->
+<style>
+.custom-btn {
+    background-color: ${bgColor.value};
+    color: ${textColor.value};
+    padding: 12px ${padding.value}px;
+    border: none;
+    border-radius: ${rounded.value}px;
+    box-shadow: ${shadowCss};
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+</style>`;
+            generatedCode.querySelector('code').textContent = code;
+        }
+        
+        // 生成卡片代码
+        function generateCardCode() {
+            const shadowIntensity = shadow.value;
+            let shadowCss;
+            
+            if (shadowIntensity == 0) {
+                shadowCss = 'none';
+            } else {
+                const blur = shadowIntensity * 3;
+                const spread = shadowIntensity / 2;
+                const opacity = 0.1 + (shadowIntensity * 0.05);
+                shadowCss = `0 ${shadowIntensity}px ${blur}px ${spread}px rgba(0, 0, 0, ${opacity})`;
+            }
+            
+            const code = `<!-- HTML -->
+<div class="custom-card">
+    <img src="https://via.placeholder.com/300x180/667eea/ffffff?text=示例图片" alt="示例">
+    <div class="custom-card-content">
+        <h3>示例卡片</h3>
+        <p>这是一个通过工具生成的卡片组件示例。</p>
+        <button class="custom-card-btn">行动按钮</button>
+    </div>
+</div>
+
+<!-- CSS -->
+<style>
+.custom-card {
+    width: 100%;
+    max-width: 300px;
+    background: white;
+    border-radius: ${rounded.value}px;
+    overflow: hidden;
+    box-shadow: ${shadowCss};
+}
+
+.custom-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.custom-card-content {
+    padding: 20px;
+}
+
+.custom-card h3 {
+    margin-bottom: 10px;
+    color: #2d3748;
+}
+
+.custom-card p {
+    color: #718096;
+    margin-bottom: 15px;
+}
+
+.custom-card-btn {
+    background: ${bgColor.value};
+    color: ${textColor.value};
+    padding: 8px ${padding.value}px;
+    border: none;
+    border-radius: ${rounded.value}px;
+    box-shadow: ${shadowCss};
+    cursor: pointer;
+}
+</style>`;
+            generatedCode.querySelector('code').textContent = code;
+        }
+        
+        // 生成导航栏代码
+        function generateNavbarCode() {
+            const shadowIntensity = shadow.value;
+            let shadowCss;
+            
+            if (shadowIntensity == 0) {
+                shadowCss = 'none';
+            } else {
+                const blur = shadowIntensity * 3;
+                const spread = shadowIntensity / 2;
+                const opacity = 0.1 + (shadowIntensity * 0.05);
+                shadowCss = `0 ${shadowIntensity}px ${blur}px ${spread}px rgba(0, 0, 0, ${opacity})`;
+            }
+            
+            const code = `<!-- HTML -->
+<nav class="custom-navbar">
+    <div class="logo">Logo</div>
+    <div class="nav-links">
+        <a href="#">首页</a>
+        <a href="#">服务</a>
+        <a href="#">关于</a>
+        <a href="#">联系</a>
+    </div>
+</nav>
+
+<!-- CSS -->
+<style>
+.custom-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border-radius: ${rounded.value}px;
+    width: 100%;
+    box-shadow: ${shadowCss};
+}
+
+.custom-navbar .logo {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: ${bgColor.value};
+}
+
+.custom-navbar .nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.custom-navbar .nav-links a {
+    text-decoration: none;
+    color: ${textColor.value};
+    font-weight: 500;
+}
+</style>`;
+            generatedCode.querySelector('code').textContent = code;
+        }
+        
+        // 复制代码功能
+        copyButton.addEventListener('click', () => {
+            const code = generatedCode.querySelector('code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                copyButton.innerHTML = '<i class="fas fa-check"></i> 已复制!';
+                setTimeout(() => {
+                    copyButton.innerHTML = '<i class="fas fa-copy"></i> 复制代码';
+                }, 2000);
+            });
+        });
+        
+        // 初始化预览
+        updatePreview();
+    </script>
+</body>
+</html>
